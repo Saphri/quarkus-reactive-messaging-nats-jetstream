@@ -237,13 +237,13 @@ class MessageSubscriberProcessorTest {
             }
 
             @Override
-            public @NonNull Optional<Duration> replyTimeout() {
-                return Optional.empty();
+            public @NonNull Duration replyTimeout() {
+                return Duration.ofMillis(5000);
             }
 
             @Override
-            public @NonNull Optional<Duration> replyInactiveThreshold() {
-                return Optional.empty();
+            public @NonNull Duration replyInactiveThreshold() {
+                return Duration.ofMillis(60000);
             }
 
             @SuppressWarnings({ "DataFlowIssue" })

@@ -17,8 +17,8 @@ record PublisherChannelConfigurationImpl(
         @NonNull Optional<String> datasource,
         @NonNull String subject,
         @NonNull Optional<String> replySubject,
-        @NonNull Optional<Duration> replyTimeout,
-        @NonNull Optional<Duration> replyInactiveThreshold,
+        @NonNull Duration replyTimeout,
+        @NonNull Duration replyInactiveThreshold,
         @NonNull CorrelationIdHandler replyCorrelationIdHandler,
         @NonNull Optional<ReplyFailureHandler> replyFailureHandler) implements PublisherChannelConfiguration {
 }

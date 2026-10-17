@@ -1,6 +1,5 @@
 package io.quarkiverse.reactive.messaging.nats.jetstream.connector.reply;
 
-import java.time.Duration;
 import java.util.Map;
 
 import org.eclipse.microprofile.reactive.messaging.Message;
@@ -28,14 +27,6 @@ public interface RequestReply<Req, Rep> extends EmitterType {
 
     /** Suffix appended to the channel subject to derive the default reply subject when none is configured. */
     String DEFAULT_REPLY_SUBJECT_SUFFIX = ".replies";
-
-    Duration DEFAULT_TIMEOUT = Duration.ofMillis(5_000L);
-
-    /**
-     * Default {@code reply.inactive-threshold} in milliseconds: how long NATS keeps an idle reply consumer before reclaiming
-     * it.
-     */
-    Duration DEFAULT_INACTIVE_THRESHOLD = Duration.ofMillis(60_000L);
 
     /**
      * Sends a request and waits for the matching reply.

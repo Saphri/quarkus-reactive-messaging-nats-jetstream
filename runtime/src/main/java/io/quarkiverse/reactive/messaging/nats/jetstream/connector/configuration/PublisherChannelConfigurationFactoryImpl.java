@@ -37,33 +37,16 @@ public class PublisherChannelConfigurationFactoryImpl implements PublisherChanne
 
     @Override
     public @NonNull PublisherChannelConfiguration create(@NonNull String channel, @NonNull Config config) {
-        final var channelConfig = Configs.outgoing(config, JetStreamConnector.CONNECTOR_NAME, channel);
-        final var correlationIdHandlerId = nonBlank(
-                channelConfig.getOptionalValue("reply.correlation-id.handler", String.class))
-                .orElse(UuidCorrelationIdHandler.ID);
-        final var failureHandlerId = nonBlank(channelConfig.getOptionalValue("reply.failure.handler", String.class));
-        return PublisherChannelConfigurationImpl.builder()
-                .name(channel)
-                .stream(channelConfig.getValue("stream", String.class))
-                .retryBackoff(channelConfig.getOptionalValue("retry-backoff", Long.class).map(Duration::ofMillis))
-                .datasource(channelConfig.getOptionalValue("datasource", String.class))
-                .subject(channelConfig.getValue("subject", String.class))
-                .replySubject(nonBlank(channelConfig.getOptionalValue("reply.subject", String.class)))
-                .replyTimeout(channelConfig.getOptionalValue("reply.timeout", Long.class).map(Duration::ofMillis))
-                .replyInactiveThreshold(
-                        channelConfig.getOptionalValue("reply.inactive-threshold", Long.class).map(Duration::ofMillis))
-                .replyCorrelationIdHandler(resolveHandler(correlationIdHandlers, CorrelationIdHandler.class, channel,
-                        "reply.correlation-id.handler", correlationIdHandlerId))
-                .replyFailureHandler(failureHandlerId.map(
-                        id -> resolveHandler(failureHandlers, ReplyFailureHandler.class, channel, "reply.failure.handler", id)))
-                .build();
+        final var channelConfig = new JetStreamConnectorOutgoingConfiguration(
+                Configs.outgoing(config, JetStreamConnector.CONNECTOR_NAME, channel));
+        return create(channel, channelConfig);
     }
 
     private PublisherChannelConfiguration create(@NonNull String name,
             @NonNull JetStreamConnectorOutgoingConfiguration channelConfig) {
-        final var correlationIdHandlerId = channelConfig.getReplyCorrelationIdHandler()
+        final var correlationIdHandlerId = nonBlank(channelConfig.getReplyCorrelationIdHandler())
                 .orElse(UuidCorrelationIdHandler.ID);
-        final var failureHandlerId = channelConfig.getReplyFailureHandler();
+        final var failureHandlerId = nonBlank(channelConfig.getReplyFailureHandler());
         return PublisherChannelConfigurationImpl.builder()
                 .name(name)
                 .stream(channelConfig.getStream()
@@ -72,9 +55,9 @@ public class PublisherChannelConfigurationFactoryImpl implements PublisherChanne
                 .datasource(channelConfig.getDatasource())
                 .subject(channelConfig.getSubject().orElseThrow(
                         () -> new IllegalArgumentException(String.format("Missing subject for channel: %s", name))))
-                .replySubject(channelConfig.getReplySubject())
-                .replyTimeout(Optional.of(Duration.ofMillis(channelConfig.getReplyTimeout())))
-                .replyInactiveThreshold(Optional.of(Duration.ofMillis(channelConfig.getReplyInactiveThreshold())))
+                .replySubject(nonBlank(channelConfig.getReplySubject()))
+                .replyTimeout(Duration.ofMillis(channelConfig.getReplyTimeout()))
+                .replyInactiveThreshold(Duration.ofMillis(channelConfig.getReplyInactiveThreshold()))
                 .replyCorrelationIdHandler(
                         resolveHandler(correlationIdHandlers, CorrelationIdHandler.class, name,
                                 "reply.correlation-id.handler", correlationIdHandlerId))

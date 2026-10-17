@@ -19,7 +19,6 @@ import io.quarkiverse.reactive.messaging.nats.jetstream.client.store.configurati
 import io.quarkiverse.reactive.messaging.nats.jetstream.client.store.configuration.ObjectStoreConfiguration;
 import io.quarkiverse.reactive.messaging.nats.jetstream.client.stream.configuration.StreamConfiguration;
 import io.quarkus.runtime.StartupEvent;
-import io.smallrye.reactive.messaging.providers.helpers.CDIUtils;
 import lombok.extern.jbosslog.JBossLog;
 
 /**
@@ -34,11 +33,11 @@ import lombok.extern.jbosslog.JBossLog;
 @ApplicationScoped
 public class JetStreamResourceInitializer {
     private final ConnectorConfiguration configuration;
-    private final Instance<Client> clients;
+    private final ClientResolver clientResolver;
 
     public JetStreamResourceInitializer(ConnectorConfiguration configuration, @Any Instance<Client> clients) {
         this.configuration = configuration;
-        this.clients = clients;
+        this.clientResolver = new ClientResolver(clients);
     }
 
     void onStart(@Observes @Priority(Interceptor.Priority.LIBRARY_BEFORE - 1) StartupEvent event) {
@@ -48,7 +47,7 @@ public class JetStreamResourceInitializer {
 
     private void addJetstreamResources(String datasource, DataSourceConfiguration configuration) {
         try {
-            final var client = CDIUtils.getInstanceById(clients, datasource).get();
+            final var client = clientResolver.client(datasource);
             addStreamsIfAbsent(client, configuration.streams().values());
             addConsumersIfAbsent(client, configuration.consumers().values());
             addKeyValuesIfAbsent(client, configuration.keyValues().values());

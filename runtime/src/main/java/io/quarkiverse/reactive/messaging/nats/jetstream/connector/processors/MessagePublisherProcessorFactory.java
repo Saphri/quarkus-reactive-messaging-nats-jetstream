@@ -1,7 +1,5 @@
 package io.quarkiverse.reactive.messaging.nats.jetstream.connector.processors;
 
-import static io.quarkiverse.reactive.messaging.nats.jetstream.connector.configuration.ConnectorConfiguration.DEFAULT_DATASOURCE;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -10,17 +8,17 @@ import org.eclipse.microprofile.config.Config;
 import org.jspecify.annotations.NonNull;
 
 import io.quarkiverse.reactive.messaging.nats.jetstream.client.Client;
+import io.quarkiverse.reactive.messaging.nats.jetstream.connector.configuration.ClientResolver;
 import io.quarkiverse.reactive.messaging.nats.jetstream.connector.configuration.ConsumerChannelConfigurationFactory;
-import io.smallrye.reactive.messaging.providers.helpers.CDIUtils;
 
 @ApplicationScoped
 public class MessagePublisherProcessorFactory {
-    private final Instance<Client> clients;
+    private final ClientResolver clientResolver;
     private final ConsumerChannelConfigurationFactory channelConfigurationFactory;
 
     public MessagePublisherProcessorFactory(@Any Instance<Client> clients,
             ConsumerChannelConfigurationFactory channelConfigurationFactory) {
-        this.clients = clients;
+        this.clientResolver = new ClientResolver(clients);
         this.channelConfigurationFactory = channelConfigurationFactory;
     }
 
@@ -28,7 +26,7 @@ public class MessagePublisherProcessorFactory {
         final var channelConfiguration = channelConfigurationFactory.create(configuration);
         return new MessagePublisherProcessor<>(
                 channelConfiguration,
-                CDIUtils.getInstanceById(clients, channelConfiguration.datasource().orElse(DEFAULT_DATASOURCE)).get());
+                clientResolver.client(channelConfiguration.datasource()));
     }
 
 }

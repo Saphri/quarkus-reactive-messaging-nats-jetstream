@@ -30,27 +30,25 @@ public interface PublisherChannelConfiguration extends ChannelConfiguration {
     Optional<String> replySubject();
 
     /**
-     * Retrieves the optional reply timeout duration for the publisher channel configuration.
+     * Retrieves the reply timeout duration for the publisher channel configuration.
      * The reply timeout determines the maximum time to wait for a reply in a request-reply interaction.
+     * Defaults to the {@code reply.timeout} connector attribute default when not configured.
      *
-     * @return an optional {@code Duration} representing the reply timeout. It will be non-empty if a timeout is configured,
-     *         or empty if no timeout is defined.
+     * @return a non-null {@code Duration} representing the reply timeout
      */
     @NonNull
-    Optional<Duration> replyTimeout();
+    Duration replyTimeout();
 
     /**
-     * Retrieves the optional duration that defines the inactivity threshold
-     * for receiving replies in a publisher channel configuration. The inactivity
-     * threshold represents the duration after which a reply is considered inactive
-     * if no response is received.
+     * Retrieves the duration that defines the inactivity threshold for the reply consumer
+     * in a publisher channel configuration: how long NATS keeps an idle reply consumer before
+     * reclaiming it. Defaults to the {@code reply.inactive-threshold} connector attribute default
+     * when not configured.
      *
-     * @return an optional {@code Duration} representing the inactivity threshold
-     *         for replies. The value will be non-empty if an inactivity threshold
-     *         is configured, or empty if no such threshold is defined.
+     * @return a non-null {@code Duration} representing the inactivity threshold for replies
      */
     @NonNull
-    Optional<Duration> replyInactiveThreshold();
+    Duration replyInactiveThreshold();
 
     /**
      * Retrieves the {@code CorrelationIdHandler} associated with the publisher channel configuration.
